@@ -1,0 +1,90 @@
+typedef struct {
+  uint32 ref <format=hex>;
+  uint16 idx1, idx2;
+  POINTER<PascalString> name;
+} DicNode <read=DicNodeRead>;
+string DicNodeRead(const DicNode& node) { return PascalStringToString(node.name); }
+
+struct Dic {
+  char magic[4];  // 'DIC ' (not checked)
+  uint32 num_nodes;
+  DicNode root_node;
+  if (num_nodes > 0)
+    DicNode nodes[num_nodes] <optimize=false>;
+};
+
+typedef struct (string name_) {
+  const local string name <hidden=true> = name_;
+  DictionaryItemDatatype type;
+  uchar x1_padding <hidden=true>;
+  uint16 size;
+  uint32 x4 <hidden=true>;
+  uint64 x8 <hidden=true>;
+  Assert(x4 == 0);
+  Assert(x8 == 0);
+  switch (type) {
+    case DataType2_kInt:
+      int32 value;
+      break;
+    case DataType2_kIntArray:
+      int32 value[size];
+      break;
+    case DataType2_kBool:
+      Bool value;
+      break;
+    case DataType2_kBoolArray:
+      Bool value[size];
+      break;
+    case DataType2_kFloat:
+      float value;
+      break;
+    case DataType2_kFloatArray:
+      float value[size];
+      break;
+    case DataType2_kString:
+      POINTER<PascalString> value;
+      break;
+    case DataType2_kStringArray:
+      PascalStringArray value(size);
+      break;
+    case DataType2_kArgument:
+      POINTER<PascalString> argument;
+      break;
+    case DataType2_kActorIdentifier:
+      POINTER<PascalString> actor_name;
+      POINTER<PascalString> actor_id;
+      break;
+    case DataType2_kContainer:
+    case DataType2_kWString:
+    case DataType2_kWStringArray:
+      Assert(false, "Unhandled data type");
+      break;
+    default:
+      Assert(false, "Unknown data type");
+      break;
+  }
+
+  const local uint padding_size <hidden=true> = ((FTell() + 7) & -8) - FTell();
+  if (padding_size > 0)
+    uchar padding[padding_size] <hidden=true>;
+
+} DictionaryItem <read=DictionaryItemRead, bgcolor=0x3e6b43>;
+string DictionaryItemRead(const DictionaryItem& s) { return s.name; }
+
+struct Dictionary {
+  uint16 x0 <hidden=true>;
+  Assert(x0 == 1);
+  uint16 num_items;
+  uint32 x4 <hidden=true>;
+  Assert(x4 == 0);
+  POINTER<Dic> dic;
+  uint64 ptrs[dic.num_nodes] <format=hex>;
+
+  const local uint64 pos <hidden=true> = FTell();
+  local uint i <hidden=true> = 0;
+  for (i = 0; i < dic.num_nodes; ++i) {
+    FSeek(ptrs[i]);
+    DictionaryItem items(PascalStringToString(dic.nodes[i].name));
+  }
+  FSeek(pos);
+};

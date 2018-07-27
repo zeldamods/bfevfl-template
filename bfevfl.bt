@@ -1,0 +1,25 @@
+#include "enum.bt"
+#include "util.bt"
+#include "dic.bt"
+
+#include "relocation.bt"
+#include "header.bt"
+#include "actor.bt"
+#include "event.bt"
+
+#include "flowchart.bt"
+#include "timeline.bt"
+
+ThemeAutoScaleColors(false);
+LittleEndian();
+
+Header header <bgcolor=0x000000>;
+if (header.flowchart_offset_offset != 0) {
+  FSeek(header.flowchart_offset);
+  Flowchart root <bgcolor=0x631d00, open=true>;
+}
+
+if (header.timeline_offset_offset != 0) {
+  FSeek(header.timeline_offset);
+  Timeline root <bgcolor=0x631d00, open=true>;
+}

@@ -1,0 +1,102 @@
+enum <uchar> DataType0 {
+  DataType0_kInt = 0,
+  DataType0_kFloat = 1,
+  DataType0_kString = 2,
+  DataType0_kWString = 3,
+  DataType0_kStream = 4,
+};
+
+enum <uint16> QueryValueType {
+  QueryValueType_kBool = 0,
+  QueryValueType_kInt = 1,
+  QueryValueType_kFloat = 2,
+  QueryValueType_kString = 3,
+  QueryValueType_kConst = 4,
+};
+
+string QueryValueTypeToString(QueryValueType type) {
+  switch (type) {
+    case QueryValueType_kBool: return "Bool";
+    case QueryValueType_kInt: return "Int";
+    case QueryValueType_kFloat: return "Float";
+    case QueryValueType_kString: return "String";
+    case QueryValueType_kConst: return "Const";
+  }
+  return "Unknown";
+}
+
+enum <uchar> DataType1 {
+  DataType1_kInt = 0,
+  DataType1_kBool = 1,
+  DataType1_kFloat = 2,
+  DataType1_kString = 3,
+  DataType1_kWString = 4,
+};
+
+enum <uchar> EventType {
+  EventType_kAction = 0,
+  EventType_kSwitch = 1,
+  EventType_kFork = 2,
+  EventType_kJoin = 3,
+  EventType_kSubFlow = 4,
+};
+
+string EventTypeToString(EventType type) {
+  switch (type) {
+    case EventType_kAction: return "Action";
+    case EventType_kSwitch: return "Switch";
+    case EventType_kFork: return "Fork";
+    case EventType_kJoin: return "Join";
+    case EventType_kSubFlow: return "Sub flow";
+  }
+  return "Unknown";
+}
+
+enum <uchar> DictionaryItemDatatype {
+  DataType2_kArgument = 0,
+  DataType2_kContainer = 1,
+  DataType2_kInt = 2,
+  DataType2_kBool = 3,
+  DataType2_kFloat = 4,
+  DataType2_kString = 5,
+  DataType2_kWString = 6,
+  DataType2_kIntArray = 7,
+  DataType2_kBoolArray = 8,
+  DataType2_kFloatArray = 9,
+  DataType2_kStringArray = 10,
+  DataType2_kWStringArray = 11,
+  DataType2_kActorIdentifier = 12,
+};
+
+enum <uchar> TriggerType {
+  TriggerType_kFlowchart = 0,
+  TriggerType_kClipEnter = 1,
+  TriggerType_kClipLeave = 2,
+  TriggerType_kOneshot = 3,
+  TriggerType_kNormal = 0,
+  TriggerType_kEnter = 1,
+  TriggerType_kLeave = 2,
+};
+
+enum <uchar> TimelineState {
+  TimelineState_kNotStarted = 0,
+  TimelineState_kPlaying = 1,
+  TimelineState_kStop = 2,
+  TimelineState_kPause = 3,
+};
+
+enum <uchar> State {
+  State_kInvalid = 0,
+  State_kFree = 1,
+  State_kNotInvoked = 2,
+  State_kInvoked = 3,
+  State_kDone = 4,
+  State_kWaiting = 5,
+};
+
+enum <uchar> BuildResultType {
+  BuildResultType_kSuccess = 0,
+  BuildResultType_kInvalidOperation = 1,
+  BuildResultType_kResFlowchartNotFound = 2,
+  BuildResultType_kEntryPointNotFound = 3,
+};

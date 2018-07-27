@@ -1,0 +1,15 @@
+struct Timeline {  // TODO: this is very incomplete and full of guesses. Verify via RE.
+  char type[4];
+  uint32 x4 <format=hex>;
+  uint32 x8;
+  uint32 xc;
+  uint16 x10 <format=hex>;
+  uint16 x12 <format=hex>;
+  uint16 num_actors;
+  uint16 x16;
+  uint32 x18;
+  uint16 x1c;
+  uint16 x1e;
+  POINTER<PascalString> name;
+  struct TlinActors { POINTER<Actor[num_actors]> actors <bgcolor=0x957000, optimize=false>; } actors;
+};

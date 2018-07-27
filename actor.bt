@@ -1,0 +1,73 @@
+// Actors in EventFlows have a slightly different meaning: they are not necessarily
+// game actors (as in an entity with an Actor/ActorLink/{name}.bxml file).
+// Special values: Self, Starter, AutoPlacement, ...
+typedef struct {
+  POINTER<PascalString> name;
+  POINTER<PascalString> sub_name;
+} ActorIdentifier <read=ActorIdentifierToString>;
+
+string ActorIdentifierToString(const ActorIdentifier& actor_id) {
+  if (actor_id.sub_name_offset == 0 || actor_id.sub_name.len == 0)
+    return PascalStringToString(actor_id.name);
+  return PascalStringToString(actor_id.name) + " [" + PascalStringToString(actor_id.sub_name) + "]";
+}
+
+typedef uint16 EntryPointIndex <read=EntryPointIndexToString>;
+string EntryPointIndexToString(uint16 idx) {
+  return idx != 0xffff ? EntryPointToString(root.entry_points.entry_points[idx]) : "(none)";
+}
+
+typedef struct {
+  ActorIdentifier identifier;
+  // For any sub flow event linked from entry_point (see below):
+  //
+  // If the event param dictionary contains an Actor Identifier with a dict key matching
+  // this, then all actions and queries for this actor will be marked as in use and initialized.
+  //
+  // The game will also scan all sub flow events linked from that entry point for arguments
+  // with this name.
+  //
+  POINTER<PascalString> argument_name;
+  uint64 actions_offset <hidden=true>;
+  uint64 queries_offset <hidden=true>;
+  POINTER<Dictionary> dic_x28 <bgcolor=0x508c3f>;  // TODO: what is this used for?
+  uint16 num_actions <hidden=true>;
+  uint16 num_queries <hidden=true>;
+  EntryPointIndex entry_point;
+  uint16 x36;
+
+  const local uint64 pos <hidden=true> = FTell();
+  if (actions_offset != 0) {
+    FSeek(actions_offset);
+    PascalStringArray actions(num_actions);
+  }
+  if (queries_offset != 0) {
+    FSeek(queries_offset);
+    PascalStringArray queries(num_queries);
+  }
+  FSeek(pos);
+} Actor <read=ActorToString>;
+
+string ActorToString(const Actor& s) { return ActorIdentifierToString(s.identifier); }
+
+// Helper typedefs/structs to convert various indexes to human readable names.
+// It would have been nice to use something like lambdas to cut down on the boilerplate,
+// but 010's language is too limited.
+typedef uint16 ActorIndex <read=ActorIndexToString>;
+string ActorIndexToString(uint16 idx) { return ActorToString(root.actors.actors[idx]); }
+
+typedef struct (uint16 actor_idx_) {
+  const local ActorIndex actor_idx = actor_idx_;
+  uint16 idx;
+} ActorActionIndex <read=ActorActionIndexToString>;
+string ActorActionIndexToString(const ActorActionIndex& s) {
+  return PascalStringToString(root.actors.actors[s.actor_idx].actions.data[s.idx]);
+}
+
+typedef struct (uint16 actor_idx_) {
+  const local ActorIndex actor_idx = actor_idx_;
+  uint16 idx;
+} ActorQueryIndex <read=ActorQueryIndexToString>;
+string ActorQueryIndexToString(const ActorQueryIndex& s) {
+  return PascalStringToString(root.actors.actors[s.actor_idx].queries.data[s.idx]);
+}

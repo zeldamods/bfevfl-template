@@ -1,0 +1,43 @@
+enum <uint16> Bom {
+  Bom_Big = 0xfeff,
+  Bom_Little = 0xfffe,
+};
+
+string AlignmentRead(uchar alignment) {
+  string s; SPrintf(s, "0x%x", 1 << alignment);
+  return s;
+}
+
+struct Header {
+  char magic[8];
+  uint16 version <format=hex>;
+  uchar xa;
+  uchar xb;
+  BigEndian();
+  Bom bom <format=hex>;
+  LittleEndian();
+  uchar alignment <read=AlignmentRead>;
+  uchar xf <hidden=true>;
+  POINTER<string, uint32> name;
+  uint16 is_relocated;
+  uint16 first_block_offset <format=hex>;
+  POINTER<RelocTable, uint32> relocation_table <bgcolor=0x070728>;
+  uint32 file_size <format=hex>;
+  uint16 num_flowcharts;
+  uint16 num_timelines;
+  uint32 x24 <hidden=true>;
+  Assert(x24 == 0);
+  POINTER<uint64> flowchart_offset <format=hex, bgcolor=0x5e3a27>;
+  POINTER<Dic> flowchart_dic <bgcolor=0x996625>;
+  Assert(flowchart_dic.num_nodes == num_flowcharts);
+  POINTER<uint64> timeline_offset <format=hex, bgcolor=0x5e3a27>;
+  POINTER<Dic> timeline_dic <bgcolor=0x965025>;
+  Assert(timeline_dic.num_nodes == num_timelines);
+
+  // Nintendo checks the following things for the header (see 0x7100C8A2F8 in Switch 1.5.0)
+  Assert(version == 0x300, "Wrong version");
+  Assert(magic == "BFEVFL" && magic[6] == 0 && magic[7] == 0, "Wrong magic");
+  Assert(xa <= 0, "Wrong xa");
+  Assert(bom == Bom_Big || bom == Bom_Little, "Wrong byte order mark");
+  // Alignment is also checked but that's irrelevant here.
+};

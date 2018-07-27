@@ -1,0 +1,78 @@
+// 'Entry point' structure. References events.
+typedef struct (string name_) {
+  local string name <hidden=true> = name_;
+  uint64 sub_flow_event_indexes_offset <hidden=true>;  // Indexes in the flowchart->x30 array.
+  uint64 x8 <hidden=true>;
+  Assert(x8 == 0);
+  POINTER<uchar> ptr_x10;  // TODO: what is this? Often a nullptr.
+  Assert(ptr_x10_offset == 0);
+  uint16 num_sub_flow_event_indexes <hidden=true>;
+  uint16 x1a <hidden=true>;
+  Assert(x1a == 0);
+  EventIndex main_event_idx;
+  uint16 x1e <hidden=true>;
+  Assert(x1e == 0);
+
+  if (num_sub_flow_event_indexes > 0) {
+    const local uint64 pos <hidden=true> = FTell();
+    FSeek(sub_flow_event_indexes_offset);
+    EventIndex sub_flow_event_indexes[num_sub_flow_event_indexes];
+    FSeek(pos);
+  }
+} EntryPoint <read=EntryPointToString>;
+string EntryPointToString(const EntryPoint& s) { return s.name; }
+
+
+// 'Resource flowchart'. Root structure for non-timeline event flows.
+// It seems that at one point Nintendo had support for multi-flowchart files,
+// as is evident from the fact that the header has a flowchart DIC.
+// However the final version of the game only looks at the first flowchart and ignores the DIC.
+struct Flowchart {
+  char type[4];
+  uint32 end <format=hex>;
+  uint32 x8 <hidden=true>;
+  uint32 xc <hidden=true>;
+  Assert(x8 == 0);
+  Assert(xc == 0);
+  uint16 num_actors;
+  uint16 num_actions;
+  uint16 num_queries;
+  uint16 num_events;
+  uint16 num_entry_points;
+  uint16 x1a <hidden=true>;
+  Assert(x1a == 0);
+  uint16 x1c <hidden=true>;
+  Assert(x1c == 0);
+  uint16 x1e <hidden=true>;
+  Assert(x1e == 0);
+  POINTER<PascalString> name;
+  struct Actors { POINTER<Actor[num_actors]> actors <bgcolor=0x957000, optimize=false>; } actors;
+  struct Events { POINTER<Event[num_events]> events <bgcolor=0xa56300, optimize=false>; } events;
+
+  struct EntryPoints {
+    POINTER<Dic> dic <bgcolor=0x854020>;
+    Assert(dic.num_nodes == num_entry_points);
+    uint64 offset <hidden=true>;
+    const local uint64 pos <hidden=true> = FTell();
+    FSeek(offset);
+    local uint node_idx <hidden=true> = 0;
+    for (node_idx = 0; node_idx < dic.num_nodes; ++node_idx) {
+      EntryPoint entry_points(PascalStringToString(dic.nodes[node_idx].name))
+        <bgcolor=0x65001f>;
+    }
+    FSeek(pos);
+  } entry_points;
+
+  FSeek(end);
+
+  // Check action and query counts.
+  local uint i <hidden=true> = 0;
+  local uint action_count <hidden=true> = 0;
+  local uint query_count <hidden=true> = 0;
+  for (i = 0; i < num_actors; ++i) {
+    action_count += actors.actors[i].num_actions;
+    query_count += actors.actors[i].num_queries;
+  }
+  Assert(action_count == num_actions);
+  Assert(query_count == num_queries);
+};

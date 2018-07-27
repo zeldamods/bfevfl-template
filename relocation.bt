@@ -1,0 +1,41 @@
+struct RelocEntry {
+  uint32 offset_to_pointers <format=hex, bgcolor=0x06063c>;
+  uint32 flag <format=binary, bgcolor=0x08084c>;
+
+  const local uint64 prev_pos <hidden=true> = FTell();
+  FSeek(offset_to_pointers);
+  local uint i <hidden=true>;
+  for (i = 0; i < 0x20; ++i) {
+    if ((1 << i) & flag)
+      uint64 ptr <format=hex, bgcolor=cNone, fgcolor=0x2837ff>;
+    else
+      // Skip.
+      FSeek(FTell() + sizeof(uint64));
+  }
+  FSeek(prev_pos);
+};
+
+struct RelocSection {
+  uint64 self_offset <format=hex>;
+  uint32 offset <format=hex>;
+  uint32 length <format=hex>;
+  uint32 num_entries_to_skip;
+  uint32 num_entries;
+
+  // Nintendo calculates the table base pointer by doing: tablePtr - table.offset (if self_offset == 0)
+  // We don't need to actually relocate things though, so just use 0 as the base pointer.
+  const local uint64 base = self_offset ? (self_offset - offset) : 0;
+  Assert(base == 0, "Non zero bases are not supported at the moment");
+
+  if (num_entries_to_skip > 0)
+    RelocEntry skipped_entries[num_entries_to_skip] <optimize=false>;
+  RelocEntry entries[num_entries - num_entries_to_skip] <optimize=false>;
+};
+
+struct RelocTable {
+  char magic[4];
+  uint32 self_offset <format=hex>;
+  uint32 num_sections;
+  uint32 padding;  // Confirmed this is unused via RE.
+  RelocSection sections[num_sections] <optimize=false, bgcolor=0x10103c>;
+};

@@ -1,0 +1,28 @@
+typedef uint32 Bool <read=BoolRead>;
+string BoolRead(uint32 value) { return value != 0 ? "true" : "false"; }
+
+typedef struct {
+  uint16 len;
+  if (len)
+    char data[len];
+} PascalString  <read=PascalStringToString>;
+
+string PascalStringToString(const PascalString& str) {
+  return str.len ? str.data : "";
+}
+
+typedef struct (uint64 size) {
+  uint64 ptrs[size] <hidden=true>;
+  const local uint64 pos <hidden=true> = FTell();
+  local uint64 i <hidden=true> = 0;
+  for (i = 0; i < size; ++i) {
+    FSeek(ptrs[i]);
+    PascalString data;
+  }
+  FSeek(pos);
+} PascalStringArray <read=PascalStringArrayRead>;
+
+string PascalStringArrayRead(const PascalStringArray& array) {
+  string s; SPrintf(s, "%u string(s)", sizeof(array.ptrs) / sizeof(array.ptrs[0]));
+  return s;
+}
