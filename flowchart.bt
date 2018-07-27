@@ -29,7 +29,7 @@ string EntryPointToString(const EntryPoint& s) { return s.name; }
 // However the final version of the game only looks at the first flowchart and ignores the DIC.
 struct Flowchart {
   char type[4];
-  uint32 end <format=hex>;
+  uint32 string_table_offset <format=hex>;  // Relative.
   uint32 x8 <hidden=true>;
   uint32 xc <hidden=true>;
   Assert(x8 == 0);
