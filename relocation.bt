@@ -22,7 +22,7 @@ struct RelocSection {
   uint32 num_entries_to_skip;
   uint32 num_entries;
 
-  // Nintendo calculates the table base pointer by doing: tablePtr - table.offset (if self_offset == 0)
+  // Nintendo calculates the table base pointer by doing: tablePtr - table.offset (if self_offset != 0)
   // We don't need to actually relocate things though, so just use 0 as the base pointer.
   const local uint64 base = self_offset ? (self_offset - offset) : 0;
   Assert(base == 0, "Non zero bases are not supported at the moment");

@@ -28,6 +28,8 @@ string EntryPointToString(const EntryPoint& s) { return s.name; }
 // as is evident from the fact that the header has a flowchart DIC.
 // However the final version of the game only looks at the first flowchart and ignores the DIC.
 struct Flowchart {
+  const uint64 start <hidden=true> = FTell();
+
   char type[4];
   uint32 string_table_offset <format=hex>;  // Relative.
   uint32 x8 <hidden=true>;
@@ -63,7 +65,7 @@ struct Flowchart {
     FSeek(pos);
   } entry_points;
 
-  FSeek(end);
+  FSeek(start + string_table_offset);
 
   // Check action and query counts.
   local uint i <hidden=true> = 0;
