@@ -47,6 +47,7 @@ typedef struct {
       uint16 xe <hidden=true>;
       Assert(xc == 0 && xe == 0);
       POINTER<Dictionary> params <bgcolor=0x0084ea>;
+      Assert(params_offset == 0);
       break;
     case EventType_kSubFlow:
       EventIndex next;
@@ -64,6 +65,10 @@ typedef struct {
     POINTER<PascalString> required_res_flowchart_name;
     // If present, the game will check whether the name of the entry point matches with this.
     POINTER<PascalString> required_entry_point_name;
+    if (type != EventType_kSubFlow) {
+      Assert(required_res_flowchart_name_offset == 0);
+      Assert(required_entry_point_name_offset == 0);
+    }
   }
 } Event <read=EventToString>;
 
