@@ -1,16 +1,26 @@
+struct VariableDef {
+  uint64 ptr_x0;
+  uint16 x8;
+  uchar xa;
+  uchar xb[5] <hidden=true>; // padding
+};
+
 // 'Entry point' structure. References events.
 typedef struct (string name_) {
   local string name <hidden=true> = name_;
   uint64 sub_flow_event_indexes_offset <hidden=true>;  // Indexes in the flowchart->x30 array.
-  uint64 x8 <hidden=true>;
-  Assert(x8 == 0);
-  POINTER<uchar> ptr_x10;  // TODO: what is this? Often a nullptr.
-  Assert(ptr_x10_offset == 0);
+
+  // Variable defs are read and parsed, but unused by BotW flowcharts as of 1.5.0.
+  POINTER<Dic> variable_def_names;
+  Assert(variable_def_names_offset == 0);
+  POINTER<VariableDef> variable_defs;
+  Assert(variable_defs_offset == 0);
+
   uint16 num_sub_flow_event_indexes <hidden=true>;
-  uint16 x1a <hidden=true>;
-  Assert(x1a == 0);
+  uint16 num_variable_defs;
+  Assert(num_variable_defs == 0);
   EventIndex main_event_idx;
-  uint16 x1e <hidden=true>;
+  uint16 x1e <hidden=true>; // padding
   Assert(x1e == 0);
 
   if (num_sub_flow_event_indexes > 0) {
@@ -32,8 +42,8 @@ struct Flowchart {
 
   char type[4];
   uint32 string_table_offset <format=hex>;  // Relative.
-  uint32 x8 <hidden=true>;
-  uint32 xc <hidden=true>;
+  uint32 x8 <hidden=true>; // padding
+  uint32 xc <hidden=true>; // padding
   Assert(x8 == 0);
   Assert(xc == 0);
   uint16 num_actors;
@@ -41,11 +51,11 @@ struct Flowchart {
   uint16 num_queries;
   uint16 num_events;
   uint16 num_entry_points;
-  uint16 x1a <hidden=true>;
+  uint16 x1a <hidden=true>; // padding
   Assert(x1a == 0);
-  uint16 x1c <hidden=true>;
+  uint16 x1c <hidden=true>; // padding
   Assert(x1c == 0);
-  uint16 x1e <hidden=true>;
+  uint16 x1e <hidden=true>; // padding
   Assert(x1e == 0);
   POINTER<PascalString> name;
   struct Actors { POINTER<Actor[num_actors]> actors <bgcolor=0x957000, optimize=false>; } actors;

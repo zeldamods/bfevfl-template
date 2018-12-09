@@ -34,7 +34,8 @@ typedef struct {
   uint16 num_actions <hidden=true>;
   uint16 num_queries <hidden=true>;
   EntryPointIndex entry_point;
-  uint16 x36;
+  uchar cut_number;  // 1 in flowcharts and <cut index + 1> in timelines. TODO: is this used?
+  uchar padding <hidden=true>; Assert(padding == 0);
 
   const local uint64 pos <hidden=true> = FTell();
   if (actions_offset != 0) {

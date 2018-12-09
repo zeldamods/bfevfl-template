@@ -31,28 +31,28 @@ typedef struct {
       ActorQueryIndex query_index(actor_index);
       POINTER<Dictionary> query_params <bgcolor=0x0084ea>;
       POINTER<EventSwitchCase[num_cases]> cases <bgcolor=0x013dc6>;
-      POINTER<uchar> unused <hidden=true>;
+      POINTER<uchar> unused <hidden=true>; // padding
       Assert(unused_offset == 0);
       break;
     case EventType_kFork:
       uint16 num_forks;
       EventIndex join_idx;
-      uint16 xe <hidden=true>;
+      uint16 xe <hidden=true>; // padding
       Assert(xe == 0);
       POINTER<EventIndex[num_forks]> fork <bgcolor=0x2222c1>;
       break;
     case EventType_kJoin:
       EventIndex next;
-      uint16 xc <hidden=true>;
-      uint16 xe <hidden=true>;
+      uint16 xc <hidden=true>; // padding
+      uint16 xe <hidden=true>; // padding
       Assert(xc == 0 && xe == 0);
-      POINTER<Dictionary> params <bgcolor=0x0084ea>;
+      POINTER<Dictionary> params; // padding
       Assert(params_offset == 0);
       break;
     case EventType_kSubFlow:
       EventIndex next;
-      uint16 xc <hidden=true>;
-      uint16 xe <hidden=true>;
+      uint16 xc <hidden=true>; // padding
+      uint16 xe <hidden=true>; // padding
       Assert(xc == 0 && xe == 0);
       POINTER<Dictionary> params <bgcolor=0x0084ea>;
       break;

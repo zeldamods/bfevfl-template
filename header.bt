@@ -23,9 +23,11 @@ struct Header {
   uint16 first_block_offset <format=hex>;
   POINTER<RelocTable, uint32> relocation_table <bgcolor=0x070728>;
   uint32 file_size <format=hex>;
+  // End of ore::BinaryFileHeader (sizeof = 0x20)
+
   uint16 num_flowcharts;
   uint16 num_timelines;
-  uint32 x24 <hidden=true>;
+  uint32 x24 <hidden=true>; // padding
   Assert(x24 == 0);
   POINTER<uint64> flowchart_offset <format=hex, bgcolor=0x5e3a27>;
   POINTER<Dic> flowchart_dic <bgcolor=0x996625>;

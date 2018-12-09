@@ -1,15 +1,92 @@
-struct Timeline {  // TODO: this is very incomplete and full of guesses. Verify via RE.
-  char type[4];
-  uint32 x4 <format=hex>;
-  uint32 x8;
-  uint32 xc;
-  uint16 x10 <format=hex>;
-  uint16 x12 <format=hex>;
-  uint16 num_actors;
-  uint16 x16;
-  uint32 x18;
-  uint16 x1c;
-  uint16 x1e;
+typedef struct {
+  float start_time;
+  float duration;
+  ActorIndex actor_index;
+  ActorActionIndex action_index(actor_index);
+  uchar xc;  // TODO: what is this?
+  uchar xd <hidden=true>, xe <hidden=true>, xf <hidden=true>; // padding
+  Assert(xd == 0 && xe == 0 && xf == 0);
+  POINTER<Dictionary> params;
+} Clip <read=ClipToString>;
+string ClipToString(const Clip& clip) {
+  string s = "";
+  SPrintf(s, "%d-%d", clip.start_time, clip.start_time + clip.duration);
+  s += " - " + ActorIndexToString(clip.actor_index);
+  s += "::" + ActorActionIndexToString(clip.action_index);
+  return s;
+}
+
+typedef uint16 ClipIndex <read=ClipIndexToString>;
+string ClipIndexToString(uint16 idx) {
+  return idx != 0xffff ? ClipToString(root.clips.clips[idx]) : "(none)";
+}
+
+struct Oneshot {
+  float time;
+  ActorIndex actor_index;
+  ActorActionIndex action_index(actor_index);
+  uint64 x8 <hidden=true>;  // padding
+  Assert(x8 == 0);
+  POINTER<Dictionary> params;
+};
+
+// TODO: this seems to be unused by the EventFlow library. It might be read by
+// BotW's event manager... To investigate.
+typedef struct {
+  float duration;  // TODO: is this correct?
+  uint32 x4;  // TODO: what is this?
   POINTER<PascalString> name;
-  struct TlinActors { POINTER<Actor[num_actors]> actors <bgcolor=0x957000, optimize=false>; } actors;
+  POINTER<Dictionary> params;
+} Cut <read=CutToString>;
+string CutToString(const Cut& cut) {
+  return PascalStringToString(cut.name);
+}
+
+typedef struct {
+  ClipIndex clip_index;
+  TriggerType type;
+  uchar padding <hidden=true>;
+} Trigger <read=TriggerToString>;
+string TriggerToString(const Trigger& t) {
+  // Source: evfl::TimelineObj::CalcImpl
+  float trigger_time;
+  if (t.type == TriggerType_kClipEnter)
+    trigger_time = root.clips.clips[t.clip_index].start_time;
+  else if (t.type == TriggerType_kClipLeave)
+    trigger_time = root.clips.clips[t.clip_index].start_time + root.clips.clips[t.clip_index].duration;
+  else
+    trigger_time = 0.0;
+  string s;
+  SPrintf(s, "Type %d - at %d", t.type, trigger_time);
+  s += " - " + ClipIndexToString(t.clip_index);
+  return s;
+}
+
+typedef struct {
+  POINTER<PascalString> name;
+} Subtimeline <read=SubtimelineToString>;
+string SubtimelineToString(const Subtimeline& s) {
+  return PascalStringToString(s.name);
+}
+
+struct Timeline {
+  char type[4];
+  uint32 string_pool_offset <format=hex>;
+  uint32 x8 <hidden=true>, xc <hidden=true>; // padding
+  Assert(x8 == 0 && xc == 0);
+  float duration;
+  uint16 num_actors;
+  uint16 num_actions; // total number of actions (all actors)
+  uint16 num_clips;
+  uint16 num_oneshots;
+  uint16 num_subtimelines;
+  uint16 num_cuts;
+  POINTER<PascalString> name;  // x20
+  struct TlinActors { POINTER<Actor[num_actors]> actors <bgcolor=0x957000, optimize=false>; } actors; // x28
+  struct TlinClips { POINTER<Clip[num_clips]> clips <bgcolor=0x49003b, optimize=false>; } clips; // x30
+  struct TlinOneshots { POINTER<Oneshot[num_oneshots]> oneshots <bgcolor=0x370072, optimize=false>; } oneshots; // x38
+  struct TlinTriggers { POINTER<Trigger[2*num_clips]> triggers <bgcolor=0x180033, optimize=false>; } triggers; // x40
+  struct TlinSubtimelines { POINTER<Subtimeline> subtimelines <optimize=false>; } subtimelines; // x48
+  struct TlinCuts { POINTER<Cut[num_cuts]> cuts <optimize=false>; } cuts; // x50
+  POINTER<Dictionary> params; // x58
 };
